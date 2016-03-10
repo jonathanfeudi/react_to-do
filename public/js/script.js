@@ -10,16 +10,19 @@ const App = React.createClass({
    $.get('/tasks').done( (data)=>{
       this.state.tasks=data;
       this.setState({tasks:this.state.tasks})
+      console.log(this.state)
     })
   },
   addTask:function( newTask ) {
-    // generate a new timestamp so that we have a unique id for each task
-    var timestamp = (new Date()).getTime();
-
-    // add new task to state
-    this.state.tasks['task-'+ timestamp] = newTask;
-
-    this.setState({ tasks: this.state.tasks });
+    var that = this;
+    $.post('/tasks', newTask)
+      .done( (data)=>{
+        var newID = data[0].task_id;
+        // that.state.tasks[newID] = newTask;
+        that.state.tasks.push(newTask)
+        that.setState({ tasks: that.state.tasks });
+        console.log(that.state.tasks)
+      })
 
   },
   toggleTask:function(key){
@@ -33,7 +36,7 @@ const App = React.createClass({
   },
   filterNotComplete:function(key){
     return !this.filterComplete(key)
-  }, 
+  },
   renderTask:function(key){
     return (
       <Task key={key} index={key} details={this.state.tasks[key]} toggleTask={this.toggleTask} />
@@ -43,10 +46,10 @@ const App = React.createClass({
   render:function() {
     return (
       <div className="container">
-      
+
         <div className="row">
           <section className="col s12">
-          
+
             {/*to do unfinished tasks*/}
             <section id="todo-display" className="col s7">
               <ul className="collection with-header">
@@ -90,14 +93,13 @@ const CreateTaskForm = React.createClass({
   handleSubmit:function(event) {
     event.preventDefault();
     var task = {
-      name : this.refs.name.value,
-      completed:false,
-      desc: this.refs.desc.value
+      task_name : this.refs.name.value,
+      task_desc: this.refs.desc.value
     }
 
     // add the task to the state
     this.props.addTask(task);
-    
+
     // clear the form
     this.refs.taskForm.reset();
 
@@ -138,7 +140,7 @@ const Task = React.createClass({
     return (
       <li className="collection-item">
         <div>
-          <strong>{this.props.details.name}</strong> {this.props.details.desc}
+          <strong>{this.props.details.task_name}</strong> {this.props.details.task_desc}
           <a href="#" onClick={this.handleClick} className="secondary-content">
             <i className="material-icons">check</i>
           </a>
@@ -150,8 +152,3 @@ const Task = React.createClass({
 
 
 ReactDOM.render(<App />, document.querySelector('#container'))
-
-
-
-
-

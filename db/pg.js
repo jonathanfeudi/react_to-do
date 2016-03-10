@@ -8,7 +8,7 @@ function addTask(req, res, next){
       console.log(err);
       return res.status(500).json({success: false, data:err});
     }
-    var query = client.query("INSERT INTO tasks (task_name, task_desc) VALUES ($1, $2) RETURNING task_id;", [req.body.name, req.body.description],
+    var query = client.query("INSERT INTO tasks (task_name, task_desc) VALUES ($1, $2) RETURNING task_id;", [req.body.task_name, req.body.task_desc],
   function(err, result){
     done()
     if(err){

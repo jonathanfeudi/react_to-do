@@ -3,10 +3,8 @@ const tasks       = express.Router();
 const db = require('../db/pg.js');
 
 tasks.route('/')
-  .get(db.getTasks, (req,res)=>res.send(res.rows))
-  .post(db.addTask, (req,res)=>{
-    console.log(req.body)
-  })
+  .get(db.getTasks, (req,res)=>{res.send(res.rows)})
+  .post(db.addTask, (req,res)=>{res.send(res.rows)})
 
 tasks.route('/:taskID/time')
   .put(db.updateTime, (req, res)=>{})
