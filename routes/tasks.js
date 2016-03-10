@@ -1,20 +1,18 @@
 const express     = require('express');
 const tasks       = express.Router();
-
-
-var myTasks = {taskA:{
-      name   : 'Jason',
-      completed : true,    
-      desc   : "blurgTest"
-      }
-  };
+const db = require('../db/pg.js');
 
 tasks.route('/')
-  .get( (req,res)=>res.json(myTasks))
-  .post( (req,res)=>{
-
+  .get(db.getTasks, (req,res)=>res.send(res.rows))
+  .post(db.addTask, (req,res)=>{
+    console.log(req.body)
   })
-  .put( (req,res)=>{} )
-  .delete((req,res)=>{})
+
+tasks.route('/:taskID/time')
+  .put(db.updateTime, (req, res)=>{})
+
+tasks.route('/:taskID')
+  .put(db.modifyTask, (req,res)=>{} )
+  .delete(db.deleteTask, (req,res)=>{})
 
 module.exports = tasks;

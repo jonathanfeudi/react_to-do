@@ -7,11 +7,13 @@ const bodyParser  = require('body-parser');
 const app       = express();
 const _port     = process.argv[2]|| process.env.port||3009;
 
-const taskRoutes     = require('./routes/tasks');
+const dotenv = require('dotenv');
+dotenv.load();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+const taskRoutes     = require('./routes/tasks');
 
 // serve static files
 app.use(express.static(path.join(__dirname,'public')))
@@ -27,5 +29,5 @@ app.get('/',(req,res)=>{
 
 // turn me on!
 app.listen(_port , ()=>
-  console.log(`server here! listening on`, _port ) 
+  console.log(`server here! listening on`, _port )
 )
