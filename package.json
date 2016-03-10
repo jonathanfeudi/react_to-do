@@ -19,7 +19,7 @@
     "dotenv": "^2.0.0",
     "express": "^4.13.4",
     "path": "^0.12.7",
-    "pg": "^4.5.1"
+    "pg-promise": "^3.3.0"
   },
   "devDependencies": {
     "morgan": "^1.7.0"

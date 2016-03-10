@@ -1,101 +1,101 @@
-var pg = require('pg');
-var connectionString = "postgress://Feudimonster:"+process.env.DB_PASSWORD+"@localhost/todolist"
+'use strict'
+var pg = require('pg-promise')({
+    // Initialization Options
+});
+var config = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS
+  };
 
-function addTask(req, res, next){
-  pg.connect(connectionString, function(err, client, done){
-    if(err){
-      done();
-      console.log(err);
-      return res.status(500).json({success: false, data:err});
-    }
-    var query = client.query("INSERT INTO tasks (task_name, task_desc) VALUES ($1, $2) RETURNING task_id;", [req.body.name, req.body.description],
-  function(err, result){
-    done()
-    if(err){
-      return console.error('error running query', err)
-    }
-    res.rows = result.rows;
-    next()
+var db = pg(config);
+
+
+
+function getTasks(req, res, next) {
+  db.any("SELECT * from tasks;")
+    .then(function (data) {
+      res.rows = data;
+      next();
     })
-  })
-};
+    .catch(function (error) {
+        // error;
+      console.log('Error', error);
+    });
+}
 
-function getTasks(req, res, next){
-  pg.connect(connectionString, function(err, client, done){
-    if(err){
-      done();
-      console.log(err);
-      return res.status(500).json({success: false, data:err});
-    }
-    var query = client.query("SELECT * FROM tasks",
-  function(err, result){
-    done()
-    if(err){
-      return console.error('error running query', err)
-    }
-    res.rows = result.rows;
-    next()
-  })
-  })
-};
+function addTask(req, res, next) {
+  db.one(`
+    INSERT INTO
+    tasks (task_name, task_desc)
+    VALUES ($1, $2)
+    returning task_id;`,
+        [ req.body.name , req.body.description ]
+    )
+    .then((data)=>{
+      console.log('ADDED TASK SUCCESSFUL');
+      res.rows = data;
+      next();
+    })
+    .catch((error)=>{
+      console.log('ERROR in ADDING TASK!', error);
+    })
+}
 
-function deleteTask(req, res, next){
-  pg.connect(connectionString, function(err, client, done){
-    if(err){
-      done();
-      console.log(err);
-      return res.status(500).json({success:false, data:err});
-    }
-    var id = req.params.taskID;
-    var query = client.query("DELETE * FROM tasks WHERE task_id ="+id+";",
-  function(err, result){
-    done()
-    if(err){
-      return console.error('error running query', err)
-    }
-    next()
-  })
-  })
-};
+function toggleTask(req, res, next) {
+  db.none(`
+    UPDATE tasks
+    SET completed = NOT completed
+    WHERE task_id = ($1);`,
+          [ req.params.taskid ]
+    )
+    .then(()=>{
+      console.log('UPDATED TASK SUCCESSFUL!');     // testing status for UPDATE
+      next();
+    })
+    .catch((error)=>{
+      console.log('ERROR in EDITING TASK DETAILS!', error);
+    })
+}
 
-function modifyTask(req, res, next){
-  pg.connect(connectionString, function(err, client, done){
-    if(err){
-      done();
-      console.log(err);
-      return res.status(500).json({success:false, data:err});
-    }
-    var query = client.query("UPDATE tasks SET (completed) = NOT completed WHERE task_id =($1);", [req.params.taskID],
-  function(err, result){
-    done()
-    if(err){
-      return console.error('error running query', err)
-    }
-    next()
+function updateTime(req, res, next) {
+  db.none(`
+      UPDATE tasks
+      SET
+        task_time_start = ($1),
+        task_time_end = ($2)
+      WHERE task_id = ($3);`,
+        [ req.body.start_time, req.body.end_time , req.params.taskid ] )
+  .then(()=>{
+    console.log('UPDATED TASK TIME SUCCESSFUL!');     // testing status for UPDATE
+    next();
   })
+  .catch((error)=>{
+    console.log('ERROR in EDITING TIME!', error);
   })
-};
+}
 
-function updateTime(req, res, next){
-  pg.connect(connectionString, function(err, client, done){
-    if(err){
-      done();
-      console.log(err);
-      return res.status(500).json({success:false, data:err});
-    }
-    var query = client.query("UPDATE tasks SET (task_time_start, task_time_end) = ($1, $2) WHERE task_id = ($3);", [req.body.task_time_start, req.body.task_time_end, req.params.taskID],
-  function(err, result){
-    done()
-    if(err){
-      return console.error('error running query', err)
-    }
-    next()
-  })
-  })
-};
+function deleteTask(req, res, next) {
+  db.none(`
+    DELETE FROM
+    tasks WHERE task_id = ($1);`,
+          [ req.params.taskid ])
+    .then(()=>{
+      console.log('DELETE COMPLETED!');     // testing status for DELETE
+      next();
+    })
+    .catch((error)=>{
+      console.log('ERROR in DELETING TASK!', error);
+    })
+}
 
-module.exports.updateTime = updateTime;
-module.exports.modifyTask = modifyTask;
+
+
+
+module.exports.getTasks   = getTasks;
+module.exports.addTask    = addTask;
+module.exports.toggleTask = toggleTask;
 module.exports.deleteTask = deleteTask;
-module.exports.addTask = addTask;
-module.exports.getTasks = getTasks;
+module.exports.updateTime = updateTime;

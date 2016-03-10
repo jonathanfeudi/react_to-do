@@ -1,11 +1,11 @@
-DROP TABLE if exists tasks;
+DROP TABLE IF EXISTS tasks;
 
 CREATE TABLE tasks (
-  task_id SERIAL UNIQUE PRIMARY KEY,
+  task_id  serial unique primary key,
   task_name VARCHAR(50),
   task_desc TEXT,
-  completed BOOLEAN NOT NULL DEFAULT false,
-  task_time_start TIMESTAMP,
-  task_time_end TIMESTAMP,
-  task_created TIMESTAMP DEFAULT now()
+  completed boolean not null default false,
+  task_time_start timestamp,
+  task_time_end timestamp,
+  task_created timestamp not null default now()
 );
