@@ -10,24 +10,26 @@ const App = React.createClass({
    $.get('/tasks').done( (data)=>{
       this.state.tasks=data;
       this.setState({tasks:this.state.tasks})
-      console.log(this.state)
     })
   },
   addTask:function( newTask ) {
     var that = this;
-    $.post('/tasks', newTask)
-      .done( (data)=>{
-        var newID = data[0].task_id;
-        // that.state.tasks[newID] = newTask;
-        that.state.tasks.push(newTask)
-        that.setState({ tasks: that.state.tasks });
-        console.log(that.state.tasks)
-      })
-
+    $.post('/tasks', newTask).done( (data)=>{
+      $.get('/tasks').done( (data)=>{
+         this.state.tasks=data;
+         this.setState({tasks:this.state.tasks})
+       })
+    })
   },
   toggleTask:function(key){
     this.state.tasks[key].completed = !this.state.tasks[key].completed;
     this.setState({tasks:this.state.tasks});
+    console.log(this.state.tasks[key].task_id)
+    $.ajax({
+      url: '/tasks/'+this.state.tasks[key].task_id,
+      type: 'PUT'
+      }
+    )
   },
 
 

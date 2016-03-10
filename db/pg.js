@@ -16,7 +16,7 @@ function addTask(req, res, next){
     }
     res.rows = result.rows;
     next()
-    })
+  })
   })
 };
 
@@ -65,7 +65,7 @@ function modifyTask(req, res, next){
       console.log(err);
       return res.status(500).json({success:false, data:err});
     }
-    var query = client.query("UPDATE tasks SET (completed) = NOT completed WHERE task_id =($1);", [req.params.taskID],
+    var query = client.query("UPDATE tasks SET completed = NOT completed WHERE task_id =($1);", [req.params.taskID],
   function(err, result){
     done()
     if(err){
